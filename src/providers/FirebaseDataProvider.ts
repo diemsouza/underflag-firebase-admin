@@ -1,4 +1,4 @@
-import { IDataProvider, DataModel } from 'underflag';
+import { IDataProvider, Feature } from 'underflag';
 import * as admin from 'firebase-admin';
 import { RemoteConfigTemplate } from 'firebase-admin/lib/remote-config/remote-config-api';
 import { RemoteConfig } from 'firebase-admin/lib/remote-config/remote-config';
@@ -13,7 +13,7 @@ function instanceOfApp(object: any) {
 }
 
 export class FirebaseDataProvider implements IDataProvider {
-    private params: DataModel[] = [];
+    private params: Feature[] = [];
     private remoteConfig: RemoteConfig;
 
     constructor(options?: Options) {
@@ -50,10 +50,10 @@ export class FirebaseDataProvider implements IDataProvider {
         }
     }
 
-    private mapTemplate(template: RemoteConfigTemplate): DataModel[] {
+    private mapTemplate(template: RemoteConfigTemplate): Feature[] {
         if (!template || !template.parameters) return [];
         const keys = Object.keys(template.parameters);
-        const items: DataModel[] = [];
+        const items: Feature[] = [];
         keys.forEach(key => {
             const { valueType, defaultValue, description } = template.parameters[key];
             if (valueType && defaultValue) {
@@ -65,13 +65,13 @@ export class FirebaseDataProvider implements IDataProvider {
         return items;
     }
 
-    async getAll(): Promise<DataModel[]> {
+    async getAll(): Promise<Feature[]> {
         const template: RemoteConfigTemplate = await this.remoteConfig.getTemplate();
         this.params = this.mapTemplate(template);
         return this.params;
     }
 
-    async get(key: string): Promise<DataModel | undefined> {
+    async get(key: string): Promise<Feature | undefined> {
         if (!this.params.length) {
             this.params = await this.getAll();
         }
