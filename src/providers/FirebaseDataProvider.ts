@@ -1,4 +1,4 @@
-import { IDataProvider, Feature } from 'underflag';
+import { IDataProvider, BaseFeature } from 'underflag';
 import * as admin from 'firebase-admin';
 import { RemoteConfigTemplate } from 'firebase-admin/lib/remote-config/remote-config-api';
 import { RemoteConfig } from 'firebase-admin/lib/remote-config/remote-config';
@@ -13,7 +13,7 @@ function instanceOfApp(object: any) {
 }
 
 export class FirebaseDataProvider implements IDataProvider {
-    private params: Feature[] = [];
+    private params: BaseFeature[] = [];
     private remoteConfig: RemoteConfig;
 
     constructor(options?: Options) {
@@ -50,10 +50,10 @@ export class FirebaseDataProvider implements IDataProvider {
         }
     }
 
-    private mapTemplate(template: RemoteConfigTemplate): Feature[] {
+    private mapTemplate(template: RemoteConfigTemplate): BaseFeature[] {
         if (!template || !template.parameters) return [];
         const keys = Object.keys(template.parameters);
-        const items: Feature[] = [];
+        const items: BaseFeature[] = [];
         keys.forEach(key => {
             const { valueType, defaultValue, description } = template.parameters[key];
             if (valueType && defaultValue) {
@@ -65,13 +65,13 @@ export class FirebaseDataProvider implements IDataProvider {
         return items;
     }
 
-    async getAll(): Promise<Feature[]> {
+    async getAll(): Promise<BaseFeature[]> {
         const template: RemoteConfigTemplate = await this.remoteConfig.getTemplate();
         this.params = this.mapTemplate(template);
         return this.params;
     }
 
-    async get(key: string): Promise<Feature | undefined> {
+    async get(key: string): Promise<BaseFeature | undefined> {
         if (!this.params.length) {
             this.params = await this.getAll();
         }
